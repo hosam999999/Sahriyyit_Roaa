@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>سهرية المهندسة رؤى - 4.12.2026</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Aref+Ruqaa:wght@400;700&family=Cormorant+Garamond:wght@500;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #2a121a;
+            font-family: 'Tajawal', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+        }
+
+        /* 9:16 Vertical Video Stage */
+        .video-stage {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            margin: 0 auto;
+            overflow: hidden;
+            background: 
+                url('bg.jpg') center center / cover no-repeat,
+                linear-gradient(180deg, #dfb0c0 0%, #e8bfd0 45%, #c98da3 100%);
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.65);
+        }
+
+        /* Subtle Cinematic Breathing Zoom on Background */
+        .bg-layer {
+            position: absolute;
+            inset: 0;
+            background: url('bg.jpg') center center / cover no-repeat;
+            z-index: 1;
+            transition: transform 20s ease-out;
+        }
+        .video-stage.playing .bg-layer {
+            transform: scale(1.035);
+        }
+
+        /* Exact White Text + Dark Plum Drop-Shadow from the Video */
+        .video-text-shadow {
+            color: #ffffff;
+            text-shadow: 
+                0 2px 5px rgba(55, 20, 35, 0.72),
+                0 0 2px rgba(45, 15, 28, 0.85);
+        }
+
+        .calligraphy-3d {
+            font-family: 'Aref Ruqaa', 'Amiri', serif;
+            color: #ffffff;
+            font-weight: 700;
+            filter: drop-shadow(0 3px 4px rgba(50, 18, 32, 0.78));
+        }
+
+        /* Spaced English Date Line: 4 . DECEMBER . 2026 */
+        .en-date-line {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 0.92rem;
+            font-weight: 600;
+            letter-spacing: 5px;
+            color: #ffffff;
+            direction: ltr;
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(50, 18, 32, 0.75);
+        }
+
+        /* Scene Containers (Upper Arch Area Above the Bride) */
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 62%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0 22px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.9s ease-in-out, visibility 0.9s ease-in-out;
+        }
+
+        .scene.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ==================== SCENE 1: OPENING COVER (00:00 - 00:04) ==================== */
+        #scene1 {
+            justify-content: center;
+            padding-top: 10vh;
+        }
+
+        .sahriya-title {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 4.3rem;
+            line-height: 1.15;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .intro-bride-name {
+            font-family: 'Amiri', serif;
+            font-size: 3.1rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 14px;
+        }
+
+        /* Center Frosted Play Button (Matching Screenshot 1) */
+        #play-overlay-btn {
+            margin-top: 18px;
+            width: 74px;
+            height: 74px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.68);
+            backdrop-filter: blur(6px);
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 8px 28px rgba(60, 20, 35, 0.38);
+            transition: transform 0.25s ease, opacity 0.4s ease;
+            animation: pulsePlay 2s infinite ease-in-out;
+        }
+        #play-overlay-btn:hover {
+            transform: scale(1.08);
+        }
+        #play-overlay-btn svg {
+            width: 30px;
+            height: 30px;
+            fill: #6d4654;
+            margin-left: 4px; /* optical center for play triangle */
+        }
+        @keyframes pulsePlay {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 28px rgba(60, 20, 35, 0.35); }
+            50% { transform: scale(1.07); box-shadow: 0 12px 34px rgba(60, 20, 35, 0.55); }
+        }
+
+        /* ==================== SCENE 2 & 3 SHARED TOP HEADER (دَعْوَة) ==================== */
+        .daawa-header {
+            margin-top: 5.5vh;
+            margin-bottom: 10px;
+        }
+
+        .daawa-word {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 3.2rem;
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        /* ==================== SCENE 2: LIBYAN POEM (00:06 - 00:20) ==================== */
+        .poem-container {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            width: 100%;
+        }
+
+        .poem-stanza {
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1.28rem;
+            font-weight: 500;
+            line-height: 1.72;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.9s ease, transform 0.9s ease;
+        }
+
+        .poem-stanza.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ==================== SCENE 3: FORMAL INVITATION DETAILS (00:21 - 00:35) ==================== */
+        .details-container {
+            margin-top: 10px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .fade-step {
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.85s ease, transform 0.85s ease;
+        }
+        .fade-step.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .family-honor-text {
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1.22rem;
+            font-weight: 500;
+            line-height: 1.68;
+            margin-bottom: 8px;
+        }
+
+        .details-bride-name {
+            font-family: 'Amiri', serif;
+            font-size: 2.75rem;
+            font-weight: 700;
+            line-height: 1.25;
+            margin: 4px 0 8px;
+        }
+
+        .mashia-text {
+            font-family: 'Tajawal', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+        }
+
+        /* 3-Column Info Grid (Date | Venue | Time) Matching Screenshot 3 */
+        .info-grid {
+            width: 100%;
+            max-width: 410px;
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1fr;
+            align-items: start;
+            margin: 2px 0 12px;
+        }
+
+        .info-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 4px 6px;
+            position: relative;
+        }
+
+        /* Vertical Dividers Between the 3 Columns */
+        .info-col:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 10%;
+            height: 80%;
+            width: 1px;
+            background: rgba(255, 255, 255, 0.55);
+            box-shadow: 0 0 3px rgba(55, 20, 35, 0.4);
+        }
+
+        .info-icon {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 6px;
+            stroke: #ffffff;
+            fill: none;
+            filter: drop-shadow(0 2px 3px rgba(55, 20, 35, 0.7));
+        }
+
+        .info-text {
+            font-family: 'Tajawal', sans-serif;
+            font-size: 0.98rem;
+            font-weight: 500;
+            line-height: 1.45;
+        }
+
+        .closing-calligraphy {
+            font-family: 'Aref Ruqaa', serif;
+            font-size: 1.85rem;
+            margin-top: 2px;
+        }
+
+        /* Floating Top Controls (Audio Mute + Replay/Scene Dots) */
+        .top-controls {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            right: 14px;
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .ctrl-btn {
+            pointer-events: auto;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(90, 35, 55, 0.45);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .ctrl-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .scene-dots {
+            pointer-events: auto;
+            display: flex;
+            gap: 6px;
+            background: rgba(90, 35, 55, 0.35);
+            backdrop-filter: blur(4px);
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        .s-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.45);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .s-dot.active {
+            width: 18px;
+            border-radius: 8px;
+            background: #ffffff;
+        }
+
+        @media (max-height: 700px) {
+            .sahriya-title { font-size: 3.5rem; }
+            .intro-bride-name { font-size: 2.5rem; }
+            .daawa-word { font-size: 2.6rem; }
+            .poem-stanza { font-size: 1.12rem; }
+            .poem-container { gap: 12px; }
+            .details-bride-name { font-size: 2.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden YouTube Player for يانا ياروحي هايمة - اغاني زمزامات ليبية (ksILSLcV3-o) -->
+    <div style="position:fixed; bottom:0; right:0; width:2px; height:2px; opacity:0.01; pointer-events:none; z-index:-1;">
+        <div id="yt-player"></div>
+    </div>
+
+    <main class="video-stage" id="stage">
+        <div class="bg-layer"></div>
+
+        <!-- Subtle Audio & Scene Navigation Bar (Appears After Clicking Play) -->
+        <div class="top-controls" id="top-controls">
+            <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()" title="كتم / تشغيل الصوت">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+            </button>
+            <div class="scene-dots">
+                <span class="s-dot active" onclick="jumpToScene(1)"></span>
+                <span class="s-dot" onclick="jumpToScene(2)"></span>
+                <span class="s-dot" onclick="jumpToScene(3)"></span>
+            </div>
+            <button class="ctrl-btn" onclick="replayInvitation()" title="إعادة العرض">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- ==================== SCENE 1: سهرية المهندسة رؤى ==================== -->
+        <section class="scene active" id="scene1">
+            <h1 class="sahriya-title calligraphy-3d">سهرية</h1>
+            <h2 class="intro-bride-name calligraphy-3d">المهندسة رؤى</h2>
+            <div class="en-date-line">4 . DECEMBER . 2026</div>
+
+            <!-- Translucent Play Button (Starts Music & Video Timeline) -->
+            <button id="play-overlay-btn" onclick="startInvitationVideo()" aria-label="تشغيل الدعوة">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+            </button>
+        </section>
+
+        <!-- ==================== SCENE 2: THE LIBYAN POEM ==================== -->
+        <section class="scene" id="scene2">
+            <div class="daawa-header">
+                <div class="daawa-word calligraphy-3d">دَعْوَة</div>
+                <div class="en-date-line">4 . DECEMBER . 2026</div>
+            </div>
+
+            <div class="poem-container">
+                <div class="poem-stanza video-text-shadow" id="stanza1">
+                    أسمك على الزينات وانتِ زينة<br>
+                    ويا سعد من دارك قبالة عينة
+                </div>
+
+                <div class="poem-stanza video-text-shadow" id="stanza2">
+                    هي سمحة و رؤى سماها<br>
+                    ان شاء اللّٰه الباهي ما يخطاها
+                </div>
+
+                <div class="poem-stanza video-text-shadow" id="stanza3">
+                    عروستنا تقول حمامة<br>
+                    لبست بَو خطين توامة
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== SCENE 3: FORMAL INVITATION DETAILS ==================== -->
+        <section class="scene" id="scene3">
+            <div class="daawa-header">
+                <div class="daawa-word calligraphy-3d">دَعْوَة</div>
+                <div class="en-date-line">4 . DECEMBER . 2026</div>
+            </div>
+
+            <div class="details-container">
+                <div class="family-honor-text video-text-shadow fade-step" id="det1">
+                    تتشرف عائلة جمعة الرقيق<br>
+                    بدعوتكم لحضور سهرية إبنتهم
+                </div>
+
+                <div class="details-bride-name calligraphy-3d fade-step" id="det2">
+                    المهندسة رؤى
+                </div>
+
+                <div class="mashia-text video-text-shadow fade-step" id="det3">
+                    وذلك بمشيئة الله تعالى :
+                </div>
+
+                <!-- 3-Column Bar: Friday 4.12.2026 | منزل العائلة | 8:00 PM -->
+                <div class="info-grid fade-step" id="det4">
+                    <!-- Column 1 (Right): Date -->
+                    <div class="info-col">
+                        <svg class="info-icon" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                            <rect x="7" y="13" width="3" height="3"></rect>
+                            <rect x="14" y="13" width="3" height="3"></rect>
+                        </svg>
+                        <div class="info-text video-text-shadow">
+                            يوم الجمعة<br>
+                            <span dir="ltr">4.12.2026</span>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 (Middle): Venue -->
+                    <div class="info-col">
+                        <svg class="info-icon" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <div class="info-text video-text-shadow">
+                            منزل العائلة
+                        </div>
+                    </div>
+
+                    <!-- Column 3 (Left): Time -->
+                    <div class="info-col">
+                        <svg class="info-icon" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="13" r="8"></circle>
+                            <path d="M12 9v4l2.5 2.5"></path>
+                            <path d="M5 3 2 6"></path>
+                            <path d="m22 6-3-3"></path>
+                        </svg>
+                        <div class="info-text video-text-shadow">
+                            الساعة<br>
+                            8:00 مساءًا
+                        </div>
+                    </div>
+                </div>
+
+                <div class="closing-calligraphy calligraphy-3d fade-step" id="det5">
+                    شاكرين لكم تلبية الدعوة
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- YouTube IFrame API for يانا ياروحي هايمة (ksILSLcV3-o) -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        var ytPlayer;
+        var ytReady = false;
+        var isPlaying = false;
+        var timers = [];
+
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('yt-player', {
+                height: '2',
+                width: '2',
+                videoId: 'ksILSLcV3-o', // يانا ياروحي هايمة - اغاني زمزامات ليبية
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'loop': 1,
+                    'playlist': 'ksILSLcV3-o',
+                    'playsinline': 1
+                },
+                events: {
+                    'onReady': function() { ytReady = true; }
+                }
+            });
+        }
+
+        function playSong() {
+            if (ytReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                ytPlayer.unMute();
+                ytPlayer.setVolume(100);
+                ytPlayer.playVideo();
+                isPlaying = true;
+            }
+        }
+
+        function toggleMute() {
+            var btn = document.getElementById('mute-btn');
+            if (!ytPlayer) return;
+            if (isPlaying) {
+                ytPlayer.pauseVideo();
+                isPlaying = false;
+                btn.style.opacity = '0.45';
+            } else {
+                ytPlayer.playVideo();
+                isPlaying = true;
+                btn.style.opacity = '1';
+            }
+        }
+
+        function clearAllTimers() {
+            timers.forEach(function(t) { clearTimeout(t); });
+            timers = [];
+        }
+
+        function setActiveDots(sceneIdx) {
+            var dots = document.querySelectorAll('.s-dot');
+            dots.forEach(function(d, i) {
+                d.classList.toggle('active', i === (sceneIdx - 1));
+            });
+        }
+
+        // Starts the exact animated timeline of the video
+        function startInvitationVideo() {
+            playSong();
+            document.getElementById('play-overlay-btn').style.display = 'none';
+            document.getElementById('top-controls').style.display = 'flex';
+            document.getElementById('stage').classList.add('playing');
+
+            clearAllTimers();
+
+            // Keep Scene 1 (سهرية المهندسة رؤى) visible for 3.2s, then transition to Scene 2 (Poem)
+            timers.push(setTimeout(function() {
+                showScene2Animated();
+            }, 3200));
+
+            // At 18.5s, transition from Scene 2 (Poem) to Scene 3 (Formal Invitation Details)
+            timers.push(setTimeout(function() {
+                showScene3Animated();
+            }, 18500));
+        }
+
+        function showScene2Animated() {
+            document.getElementById('scene1').classList.remove('active');
+            document.getElementById('scene3').classList.remove('active');
+            document.getElementById('scene2').classList.add('active');
+            setActiveDots(2);
+
+            ['stanza1', 'stanza2', 'stanza3'].forEach(function(id) {
+                document.getElementById(id).classList.remove('show');
+            });
+
+            timers.push(setTimeout(function() {
+                document.getElementById('stanza1').classList.add('show');
+            }, 600));
+
+            timers.push(setTimeout(function() {
+                document.getElementById('stanza2').classList.add('show');
+            }, 4200));
+
+            timers.push(setTimeout(function() {
+                document.getElementById('stanza3').classList.add('show');
+            }, 8200));
+        }
+
+        function showScene3Animated() {
+            document.getElementById('scene1').classList.remove('active');
+            document.getElementById('scene2').classList.remove('active');
+            document.getElementById('scene3').classList.add('active');
+            setActiveDots(3);
+
+            ['det1', 'det2', 'det3', 'det4', 'det5'].forEach(function(id) {
+                document.getElementById(id).classList.remove('show');
+            });
+
+            timers.push(setTimeout(function() {
+                document.getElementById('det1').classList.add('show');
+            }, 500));
+
+            timers.push(setTimeout(function() {
+                document.getElementById('det2').classList.add('show');
+            }, 2200));
+
+            timers.push(setTimeout(function() {
+                document.getElementById('det3').classList.add('show');
+            }, 3800));
+
+            timers.push(setTimeout(function() {
+                document.getElementById('det4').classList.add('show');
+            }, 5200));
+
+            timers.push(setTimeout(function() {
+                document.getElementById('det5').classList.add('show');
+            }, 7200));
+        }
+
+        // Allow guests to manually tap the top dots to jump to any screen
+        function jumpToScene(num) {
+            clearAllTimers();
+            document.getElementById('scene1').classList.toggle('active', num === 1);
+            document.getElementById('scene2').classList.toggle('active', num === 2);
+            document.getElementById('scene3').classList.toggle('active', num === 3);
+            setActiveDots(num);
+
+            if (num === 2) {
+                ['stanza1', 'stanza2', 'stanza3'].forEach(function(id) {
+                    document.getElementById(id).classList.add('show');
+                });
+            } else if (num === 3) {
+                ['det1', 'det2', 'det3', 'det4', 'det5'].forEach(function(id) {
+                    document.getElementById(id).classList.add('show');
+                });
+            }
+        }
+
+        function replayInvitation() {
+            clearAllTimers();
+            document.getElementById('scene2').classList.remove('active');
+            document.getElementById('scene3').classList.remove('active');
+            document.getElementById('scene1').classList.add('active');
+            setActiveDots(1);
+            startInvitationVideo();
+        }
+    </script>
+</body>
+</html>
