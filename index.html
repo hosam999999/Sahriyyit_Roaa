@@ -446,8 +446,14 @@
             .closing-calligraphy { font-size: 1.8rem; }
         }
     </style>
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
+
+    <!-- Privacy-Enhanced YouTube Player (youtube-nocookie.com) for https://youtu.be/HNNPoh73-gE -->
+    <div id="yt-shell" style="position:fixed; top:10px; left:10px; width:210px; height:210px; opacity:0.005; pointer-events:none; z-index:120; overflow:hidden; border-radius:20px;">
+        <div id="yt-player"></div>
+    </div>
 
     <!-- Ad-Free Mobile Audio Engine for مبروك يا بنية - محمد عرفان -->
     <audio id="bg-audio" loop preload="auto" playsinline></audio>
@@ -464,7 +470,7 @@
                 <div class="eq-bars" id="eq-bars">
                     <span></span><span></span><span></span>
                 </div>
-                <span>مبروك يا بنية</span>
+                <span id="song-label">مبروك يا بنية</span>
             </button>
             <button class="glass-pill-btn" onclick="replayInvitation()" title="إعادة العرض" style="padding: 0 11px;">
                 <svg viewBox="0 0 24 24">
@@ -589,181 +595,140 @@
         </section>
     </main>
 
-    <!-- 100% Ad-Free Audio Engine for مبروك يا بنية - محمد عرفان (Zero Ads) -->
+    <!-- Direct YouTube Audio Engine for https://youtu.be/HNNPoh73-gE (No Fake Synths, No Wrong Songs) -->
     <script>
-        var isMuted = false;
+        var VIDEO_ID = 'HNNPoh73-gE';
+        var ytPlayer = null;
+        var ytReady = false;
+        var wantToPlay = false;
+        var isPlaying = false;
+        var useLocalMp3 = false;
         var currentScene = 1;
         var timers = [];
         var bgAudio = document.getElementById('bg-audio');
-        var audioSourceReady = false;
-        var synthInterval = null;
-        var audioCtx = null;
+        var ytShell = document.getElementById('yt-shell');
+        var songLabel = document.getElementById('song-label');
+        var eqBars = document.getElementById('eq-bars');
+        var muteBtn = document.getElementById('mute-btn');
 
-        // 1. Load ad-free audio for "مبروك يا بنية - محمد عرفان" (HNNPoh73-gE) without any YouTube player or ads
-        async function initAdFreeSong() {
-            // Priority 1: Check if user uploaded 'music.mp3' directly in the GitHub repo
-            try {
-                var headRes = await fetch('music.mp3', { method: 'HEAD' });
-                if (headRes.ok) {
-                    bgAudio.src = 'music.mp3';
-                    bgAudio.load();
-                    audioSourceReady = true;
-                    return;
-                }
-            } catch (e) {}
+        // Optional: if 'music.mp3' is uploaded to the repo, use it directly
+        fetch('music.mp3', { method: 'HEAD' }).then(function(res) {
+            if (res.ok) {
+                useLocalMp3 = true;
+                bgAudio.src = 'music.mp3';
+                bgAudio.load();
+            }
+        }).catch(function() {});
 
-            // Priority 2: Official ad-free M4A audio stream via Apple/iTunes Search API
-            var itunesQueries = [
-                'https://itunes.apple.com/search?term=' + encodeURIComponent('مبروك يا بنية محمد عرفان') + '&media=music&entity=song&limit=10',
-                'https://itunes.apple.com/search?term=' + encodeURIComponent('مبروك يا بنية') + '&media=music&entity=song&limit=10',
-                'https://itunes.apple.com/search?term=' + encodeURIComponent('Mohamed Irfan Mabrouk') + '&media=music&entity=song&limit=10'
-            ];
-            for (var i = 0; i < itunesQueries.length; i++) {
-                try {
-                    var res = await fetch(itunesQueries[i]);
-                    var data = await res.json();
-                    if (data.results && data.results.length > 0) {
-                        var track = data.results.find(function(r) {
-                            var name = (r.trackName || '') + ' ' + (r.artistName || '');
-                            return name.includes('مبروك') || name.includes('بنية') || name.toLowerCase().includes('mabrouk');
-                        }) || data.results[0];
-                        if (track && track.previewUrl) {
-                            bgAudio.src = track.previewUrl;
-                            bgAudio.load();
-                            audioSourceReady = true;
-                            return;
+        function createYTPlayer() {
+            if (ytPlayer || !window.YT || !window.YT.Player) return;
+            ytPlayer = new YT.Player('yt-player', {
+                height: '210',
+                width: '210',
+                videoId: VIDEO_ID,
+                host: 'https://www.youtube-nocookie.com',
+                playerVars: {
+                    'autoplay': 0,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'fs': 0,
+                    'iv_load_policy': 3,
+                    'loop': 1,
+                    'modestbranding': 1,
+                    'playlist': VIDEO_ID,
+                    'playsinline': 1,
+                    'rel': 0
+                },
+                events: {
+                    'onReady': function(e) {
+                        ytReady = true;
+                        if (wantToPlay && !useLocalMp3) {
+                            e.target.unMute();
+                            e.target.setVolume(100);
+                            e.target.playVideo();
+                        }
+                    },
+                    'onStateChange': function(e) {
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            isPlaying = true;
+                            ytShell.style.pointerEvents = 'none';
+                            songLabel.textContent = 'مبروك يا بنية';
+                            eqBars.classList.remove('paused');
+                            muteBtn.style.opacity = '1';
+                        } else if (e.data === YT.PlayerState.PAUSED) {
+                            isPlaying = false;
+                            eqBars.classList.add('paused');
+                        } else if (e.data === YT.PlayerState.ENDED) {
+                            e.target.seekTo(0);
+                            e.target.playVideo();
                         }
                     }
-                } catch (e) {}
-            }
-
-            // Priority 3: Direct ad-free audio-only stream for video ID HNNPoh73-gE (no video player, zero ads)
-            var audioApis = [
-                'https://pipedapi.kavin.rocks/streams/HNNPoh73-gE',
-                'https://pipedapi.adminforge.de/streams/HNNPoh73-gE',
-                'https://api.piped.private.coffee/streams/HNNPoh73-gE'
-            ];
-            for (var j = 0; j < audioApis.length; j++) {
-                try {
-                    var pRes = await fetch(audioApis[j]);
-                    if (pRes.ok) {
-                        var pData = await pRes.json();
-                        if (pData.audioStreams && pData.audioStreams.length > 0) {
-                            var bestAudio = pData.audioStreams.find(function(s) {
-                                return (s.mimeType || '').includes('audio/mp4');
-                            }) || pData.audioStreams[0];
-                            if (bestAudio && bestAudio.url) {
-                                bgAudio.src = bestAudio.url;
-                                bgAudio.load();
-                                audioSourceReady = true;
-                                return;
-                            }
-                        }
-                    }
-                } catch (e) {}
-            }
-        }
-        initAdFreeSong();
-
-        // Built-in Festive Melody Fallback ("مبروك يا بنية ومن هو زيك") if network blocks external streams
-        function playFestiveNote(freq, duration, timeOffset, gainVal) {
-            if (!audioCtx) return;
-            var osc1 = audioCtx.createOscillator();
-            var osc2 = audioCtx.createOscillator();
-            var gain = audioCtx.createGain();
-            osc1.type = 'triangle';
-            osc2.type = 'sine';
-            osc1.frequency.setValueAtTime(freq, timeOffset);
-            osc2.frequency.setValueAtTime(freq * 2, timeOffset);
-
-            var subGain = audioCtx.createGain();
-            subGain.gain.setValueAtTime(0.16, timeOffset);
-            osc2.connect(subGain);
-
-            gain.gain.setValueAtTime(0.0001, timeOffset);
-            gain.gain.exponentialRampToValueAtTime(gainVal, timeOffset + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.0001, timeOffset + duration);
-
-            osc1.connect(gain);
-            subGain.connect(gain);
-            gain.connect(audioCtx.destination);
-
-            osc1.start(timeOffset);
-            osc2.start(timeOffset);
-            osc1.stop(timeOffset + duration + 0.04);
-            osc2.stop(timeOffset + duration + 0.04);
-        }
-
-        function startFallbackMelody() {
-            if (synthInterval) return;
-            var AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            // Festive Libyan wedding phrase ("مبروك يا بنية ومن هو زيك")
-            var notes = [
-                [293.66, 0.28, 0.00, 0.16], [349.23, 0.28, 0.26, 0.16], [392.00, 0.35, 0.52, 0.18],
-                [440.00, 0.45, 0.84, 0.20], [392.00, 0.28, 1.28, 0.17], [349.23, 0.28, 1.54, 0.17],
-                [329.63, 0.35, 1.80, 0.18], [293.66, 0.55, 2.12, 0.20],
-                [349.23, 0.28, 2.80, 0.16], [392.00, 0.28, 3.06, 0.17], [440.00, 0.35, 3.32, 0.19],
-                [466.16, 0.45, 3.64, 0.20], [440.00, 0.28, 4.08, 0.18], [392.00, 0.28, 4.34, 0.17],
-                [349.23, 0.35, 4.60, 0.18], [293.66, 0.65, 4.92, 0.20]
-            ];
-
-            function schedulePhrase() {
-                if (isMuted || !audioCtx) return;
-                var now = audioCtx.currentTime + 0.05;
-                for (var i = 0; i < notes.length; i++) {
-                    playFestiveNote(notes[i][0], notes[i][1], now + notes[i][2], notes[i][3]);
                 }
-            }
-            schedulePhrase();
-            synthInterval = setInterval(schedulePhrase, 5800);
+            });
         }
 
-        function stopFallbackMelody() {
-            if (synthInterval) {
-                clearInterval(synthInterval);
-                synthInterval = null;
-            }
+        window.onYouTubeIframeAPIReady = function() {
+            createYTPlayer();
+        };
+        if (window.YT && window.YT.Player) {
+            createYTPlayer();
         }
 
         function startMusicNow() {
-            isMuted = false;
-            document.getElementById('eq-bars').classList.remove('paused');
-            document.getElementById('mute-btn').style.opacity = '1';
+            wantToPlay = true;
 
-            if (bgAudio.src) {
+            if (useLocalMp3 && bgAudio.src) {
                 bgAudio.volume = 1.0;
                 bgAudio.play().then(function() {
-                    stopFallbackMelody();
-                }).catch(function() {
-                    startFallbackMelody();
-                });
-            } else {
-                startFallbackMelody();
-                var checkReady = setInterval(function() {
-                    if (bgAudio.src && !isMuted) {
-                        clearInterval(checkReady);
-                        bgAudio.volume = 1.0;
-                        bgAudio.play().then(function() {
-                            stopFallbackMelody();
-                        }).catch(function() {});
-                    }
-                }, 400);
+                    isPlaying = true;
+                    songLabel.textContent = 'مبروك يا بنية';
+                    eqBars.classList.remove('paused');
+                    muteBtn.style.opacity = '1';
+                }).catch(function() {});
+                return;
             }
+
+            if (ytReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
+                ytPlayer.unMute();
+                ytPlayer.setVolume(100);
+                ytPlayer.playVideo();
+            } else {
+                createYTPlayer();
+            }
+
+            // Mobile/In-App Browser Check: if cross-origin autoplay was blocked after 1.6s,
+            // make the top-left music pill tappable directly through the YouTube layer so one tap unlocks sound
+            setTimeout(function() {
+                if (!wantToPlay || useLocalMp3) return;
+                var state = (ytReady && ytPlayer && typeof ytPlayer.getPlayerState === 'function') ? ytPlayer.getPlayerState() : -1;
+                if (state !== 1 && state !== 3) {
+                    ytShell.style.pointerEvents = 'auto';
+                    songLabel.textContent = 'اضغط لتشغيل الصوت';
+                    eqBars.classList.add('paused');
+                }
+            }, 1600);
         }
 
         function toggleMute() {
-            var btn = document.getElementById('mute-btn');
-            var eq = document.getElementById('eq-bars');
-            if (!isMuted) {
-                isMuted = true;
-                bgAudio.pause();
-                stopFallbackMelody();
-                btn.style.opacity = '0.5';
-                eq.classList.add('paused');
+            if (useLocalMp3) {
+                if (!bgAudio.paused) {
+                    wantToPlay = false;
+                    bgAudio.pause();
+                    isPlaying = false;
+                    muteBtn.style.opacity = '0.5';
+                    eqBars.classList.add('paused');
+                } else {
+                    startMusicNow();
+                }
+                return;
+            }
+
+            if (isPlaying) {
+                wantToPlay = false;
+                if (ytReady && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+                isPlaying = false;
+                muteBtn.style.opacity = '0.5';
+                eqBars.classList.add('paused');
             } else {
                 startMusicNow();
             }
@@ -884,6 +849,9 @@
             document.getElementById('scene3').classList.remove('active');
             document.getElementById('scene1').classList.add('active');
             setActiveDots(1);
+            if (ytReady && ytPlayer && ytPlayer.seekTo) {
+                ytPlayer.seekTo(0);
+            }
             startInvitationVideo();
         }
 
