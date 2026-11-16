@@ -449,16 +449,6 @@
 </head>
 <body>
 
-    <!-- Pre-loaded In-Viewport YouTube IFrame for Mariage d'Amour (https://www.youtube.com/watch?v=FoCG-WNsZio) -->
-    <div style="position:fixed; top:10px; left:10px; width:240px; height:240px; opacity:0.001; pointer-events:none; z-index:5;">
-        <iframe id="yt-iframe" width="240" height="240"
-            src="https://www.youtube.com/embed/FoCG-WNsZio?enablejsapi=1&playsinline=1&loop=1&playlist=FoCG-WNsZio&controls=0&rel=0"
-            title="Mariage d'Amour"
-            frameborder="0"
-            allow="autoplay; encrypted-media">
-        </iframe>
-    </div>
-
     <!-- Synchronous Mobile Audio Engine for Mariage d'Amour -->
     <audio id="bg-audio" loop preload="auto" playsinline></audio>
 
@@ -599,19 +589,28 @@
         </section>
     </main>
 
-    <!-- YouTube IFrame API for Mariage d'Amour (FoCG-WNsZio) -->
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- 100% Ad-Free Piano Audio Engine (Zero YouTube Ads) -->
     <script>
-        var ytPlayer = null;
-        var ytReady = false;
-        var ytPlaying = false;
         var isMuted = false;
         var currentScene = 1;
         var timers = [];
         var bgAudio = document.getElementById('bg-audio');
+        var audioSourceReady = false;
+        var synthInterval = null;
+        var audioCtx = null;
 
-        // 1. Pre-load direct audio stream of Mariage d'Amour so mobile Safari plays synchronously on tap
-        async function preloadMariageDAmour() {
+        // 1. Check if a custom 'music.mp3' exists in the GitHub repo; otherwise load the ad-free studio piano stream of Mariage d'Amour
+        async function initAdFreePiano() {
+            try {
+                var headRes = await fetch('music.mp3', { method: 'HEAD' });
+                if (headRes.ok) {
+                    bgAudio.src = 'music.mp3';
+                    bgAudio.load();
+                    audioSourceReady = true;
+                    return;
+                }
+            } catch (e) {}
+
             var queries = [
                 'https://itunes.apple.com/search?term=' + encodeURIComponent("Jacob's Piano Mariage d'Amour") + '&media=music&entity=song&limit=5',
                 'https://itunes.apple.com/search?term=' + encodeURIComponent("Mariage d'Amour Paul de Senneville") + '&media=music&entity=song&limit=5'
@@ -620,33 +619,90 @@
                 try {
                     var res = await fetch(queries[i]);
                     var data = await res.json();
-                    if (data.results && data.results.length > 0 && data.results[0].previewUrl) {
-                        bgAudio.src = data.results[0].previewUrl;
-                        bgAudio.load();
-                        return;
+                    if (data.results && data.results.length > 0) {
+                        var track = data.results.find(function(r) {
+                            return (r.trackName || '').toLowerCase().includes('mariage');
+                        }) || data.results[0];
+                        if (track && track.previewUrl) {
+                            bgAudio.src = track.previewUrl;
+                            bgAudio.load();
+                            audioSourceReady = true;
+                            return;
+                        }
                     }
                 } catch (e) {}
             }
         }
-        preloadMariageDAmour();
+        initAdFreePiano();
 
-        // 2. Attach YouTube API to the pre-rendered iframe (FoCG-WNsZio)
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('yt-iframe', {
-                events: {
-                    'onReady': function() {
-                        ytReady = true;
-                    },
-                    'onStateChange': function(e) {
-                        if (e.data === YT.PlayerState.PLAYING) {
-                            ytPlaying = true;
-                            // Full 4:31 YouTube track is now playing smoothly -> pause the HTML5 backup
-                            bgAudio.pause();
-                            document.getElementById('eq-bars').classList.remove('paused');
-                        }
-                    }
+        // Built-in Concert Grand Piano Fallback (Mariage d'Amour opening in G Minor) if network blocks audio streams
+        function playPianoNote(freq, duration, timeOffset, gainVal) {
+            if (!audioCtx) return;
+            var osc1 = audioCtx.createOscillator();
+            var osc2 = audioCtx.createOscillator();
+            var gain = audioCtx.createGain();
+            osc1.type = 'triangle';
+            osc2.type = 'sine';
+            osc1.frequency.setValueAtTime(freq, timeOffset);
+            osc2.frequency.setValueAtTime(freq * 2, timeOffset);
+
+            var subGain = audioCtx.createGain();
+            subGain.gain.setValueAtTime(0.18, timeOffset);
+            osc2.connect(subGain);
+
+            gain.gain.setValueAtTime(0.0001, timeOffset);
+            gain.gain.exponentialRampToValueAtTime(gainVal, timeOffset + 0.025);
+            gain.gain.exponentialRampToValueAtTime(0.0001, timeOffset + duration);
+
+            osc1.connect(gain);
+            subGain.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc1.start(timeOffset);
+            osc2.start(timeOffset);
+            osc1.stop(timeOffset + duration + 0.05);
+            osc2.stop(timeOffset + duration + 0.05);
+        }
+
+        function startFallbackPiano() {
+            if (synthInterval) return;
+            var AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            // Mariage d'Amour (G minor arpeggio + iconic melody)
+            var notes = [
+                // Bar 1-2: Gm arpeggio + D5 Bb5 A5 G5 A5 Bb5 A5 G5 F#5 G5 A5
+                [196.00, 1.4, 0.0, 0.12], [293.66, 1.2, 0.22, 0.10], [392.00, 1.2, 0.44, 0.10],
+                [587.33, 0.6, 0.66, 0.18], [932.33, 0.45, 0.90, 0.20], [880.00, 0.45, 1.12, 0.18],
+                [783.99, 0.45, 1.34, 0.18], [880.00, 0.45, 1.56, 0.18], [932.33, 0.45, 1.78, 0.20],
+                [880.00, 0.45, 2.00, 0.18], [783.99, 0.45, 2.22, 0.18], [739.99, 0.45, 2.44, 0.18],
+                [783.99, 0.45, 2.66, 0.18], [880.00, 1.2, 2.88, 0.22],
+                // Bar 3-4: Cm arpeggio + C5 A5 G5 F#5 G5 A5 G5 F#5 E5 F#5 G5
+                [130.81, 1.4, 3.60, 0.12], [261.63, 1.2, 3.82, 0.10], [311.13, 1.2, 4.04, 0.10],
+                [523.25, 0.6, 4.26, 0.18], [880.00, 0.45, 4.50, 0.20], [783.99, 0.45, 4.72, 0.18],
+                [739.99, 0.45, 4.94, 0.18], [783.99, 0.45, 5.16, 0.18], [880.00, 0.45, 5.38, 0.20],
+                [783.99, 0.45, 5.60, 0.18], [739.99, 0.45, 5.82, 0.18], [659.25, 0.45, 6.04, 0.18],
+                [739.99, 0.45, 6.26, 0.18], [783.99, 1.4, 6.48, 0.22]
+            ];
+
+            function schedulePhrase() {
+                if (isMuted || !audioCtx) return;
+                var now = audioCtx.currentTime + 0.05;
+                for (var i = 0; i < notes.length; i++) {
+                    playPianoNote(notes[i][0], notes[i][1], now + notes[i][2], notes[i][3]);
                 }
-            });
+            }
+            schedulePhrase();
+            synthInterval = setInterval(schedulePhrase, 7400);
+        }
+
+        function stopFallbackPiano() {
+            if (synthInterval) {
+                clearInterval(synthInterval);
+                synthInterval = null;
+            }
         }
 
         function startMusicNow() {
@@ -654,24 +710,25 @@
             document.getElementById('eq-bars').classList.remove('paused');
             document.getElementById('mute-btn').style.opacity = '1';
 
-            // A) Start HTML5 Audio synchronously inside the user's tap gesture (100% iOS Safari compliant)
-            if (bgAudio.src && !ytPlaying) {
+            if (bgAudio.src) {
                 bgAudio.volume = 1.0;
-                bgAudio.play().catch(function() {});
-            }
-
-            // B) Trigger Full YouTube Track (FoCG-WNsZio)
-            if (ytReady && ytPlayer && typeof ytPlayer.playVideo === 'function') {
-                ytPlayer.unMute();
-                ytPlayer.setVolume(100);
-                ytPlayer.playVideo();
+                bgAudio.play().then(function() {
+                    stopFallbackPiano();
+                }).catch(function() {
+                    startFallbackPiano();
+                });
             } else {
-                // Direct postMessage command to pre-rendered YouTube iframe even before API callback
-                var frame = document.getElementById('yt-iframe');
-                if (frame && frame.contentWindow) {
-                    frame.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
-                    frame.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-                }
+                startFallbackPiano();
+                // Once initAdFreePiano finishes fetching, switch smoothly to the studio piano track
+                var checkReady = setInterval(function() {
+                    if (bgAudio.src && !isMuted) {
+                        clearInterval(checkReady);
+                        bgAudio.volume = 1.0;
+                        bgAudio.play().then(function() {
+                            stopFallbackPiano();
+                        }).catch(function() {});
+                    }
+                }, 400);
             }
         }
 
@@ -681,7 +738,7 @@
             if (!isMuted) {
                 isMuted = true;
                 bgAudio.pause();
-                if (ytReady && ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+                stopFallbackPiano();
                 btn.style.opacity = '0.5';
                 eq.classList.add('paused');
             } else {
